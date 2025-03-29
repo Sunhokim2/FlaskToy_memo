@@ -42,7 +42,7 @@ This project is a adorable web application using the Flask framework and MongoDB
     pip install -r requirements.txt
     ```
 
-    (Note: If you don't have a `requirements.txt` file yet, create one by running: `pip freeze > requirements.txt`)
+    (Note: I'm dont download additional pakages so requirements.txt is empty. )
 
 4.  **Run MongoDB:** Ensure that your MongoDB server is running.
 
