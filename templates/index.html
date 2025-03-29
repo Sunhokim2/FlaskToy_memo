@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>게시판</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <style>
+        body {
+            padding-top: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            background-color: #f8f9fa;
+        }
+        .container {
+            width: 100%;
+            max-width: 960px; /* 조금 더 넓게 설정함 */
+        }
+        .form-container {
+            background-color: #f8f6d7;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        .edit-form {
+            display: none;
+            margin-top: 10px;
+            background-color: #d7e8fa;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .post-container {
+            background-color: #fff;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #ffe8e8;
+            position: relative;
+        }
+        .post-display {
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        .likes-count {
+            font-size: 0.8em;
+            color: gray;
+        }
+    </style>
+</head>
+<body>
+    <!-- 전체 컨테이너 -->
+    <div class="container">
+        <!-- 게시글 작성 폼 -->
+        <div class="form-container">
+            <h1>나 홀로 메모장</h1>
+            <!-- 여기서 POST로 백엔드 부분에 요청을 합니다. -->
+            <form method="post">
+                <div class="form-group">
+                    <input type="text" class="form-control" id="title" name="title" required>
+                </div>
+                <div class="form-group">
+                    <textarea class="form-control" id="content" name="content" rows="5" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">저장하기</button>
+            </form>
+        </div>
+
+        <h2>게시글 목록</h2>
+{#            게시글 자체에는 db에서 가져오는 게시글 폼과 수정버튼으로 인해 활성화 되는 수정 폼이 존재한다.        #}
+{#            수정 폼은 display:none으로 숨겨놓고 수정 버튼을 누르면 display:block으로 변경되어 수정이 가능하다.#}
+        <div class="row">
+            {% for post in posts %}
+                <div class="col-md-6">
+                    <div class="post-container" id="post-{{ post._id }}">
+                        <!-- 게시글 폼 -->
+                        <div class="post-display">
+                            <div>
+                                <div><strong>제목:</strong> <span class="post-title">{{ post.title }}</span></div>
+                                <div><strong>내용:</strong> <span class="post-content">{{ post.content }}</span></div>
+                            </div>
+                            <div class="likes-count">좋아요 수: {{ post.like }}</div>
+                        </div>
+                            <button type="button" class="btn btn-warning btn-sm edit-button" data-post-id="{{ post._id }}">수정</button>
+                            <a href="{{ url_for('post_delete', post_id=post._id) }}" class="btn btn-danger btn-sm" onclick="alert('삭제했습니다.');">삭제</a>
+                            <a href="{{ url_for('post_like', post_id=post._id) }}" class="btn btn-success btn-sm " onclick="alert('좋아요를 표시했습니다.');">좋아요</a>
+                        <!-- 수정 폼, action을 통해 엔드포인트 설정해서 POST요청을 보낸다. 'post_edit'라는 함수 호출  -->
+                        <form method="post" action="{{ url_for('post_edit', post_id=post._id) }}" class="edit-form">
+                            <div class="form-group">
+                                <label for="edit-title-{{ post._id }}">제목:</label>
+                                <input type="text" class="form-control" id="edit-title-{{ post._id }}" name="title" value="{{ post.title }}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-content-{{ post._id }}">내용:</label>
+                                <textarea class="form-control" id="edit-content-{{ post._id }}" name="content" rows="5" required>{{ post.content }}</textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-sm" onclick="alert('수정완료!');">저장</button>
+                            <button type="button" class="btn btn-secondary btn-sm cancel-button" data-post-id="{{ post._id }}">취소</button>
+                        </form>
+                        <hr>
+                    </div>
+                </div>
+            {% else %}
+                <div class="col-12 text-center">
+                    <p>등록된 게시글이 없습니다.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js" integrity="sha384-eMNCOe7tCwlqpWbVc9oEA4hgCcQqc1avc+cN6Rvc5wIH+gbzmfxjQLxJalJlS+c==" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+    <script>
+        const editButtons = document.querySelectorAll('.edit-button');
+        const cancelButtons = document.querySelectorAll('.cancel-button');
+
+        editButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const postId = this.dataset.postId;
+                const postContainer = document.getElementById(`post-${postId}`);
+                const displayDiv = postContainer.querySelector('.post-display');
+                const editForm = postContainer.querySelector('.edit-form');
+                displayDiv.style.display = 'none';
+                editForm.style.display = 'block';
+            });
+        });
+
+        cancelButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const postId = this.dataset.postId;
+                const postContainer = document.getElementById(`post-${postId}`);
+                const displayDiv = postContainer.querySelector('.post-display');
+                const editForm = postContainer.querySelector('.edit-form');
+                editForm.style.display = 'none';
+                displayDiv.style.display = 'block';
+            });
+        });
+    </script>
+</body>
+</html>
